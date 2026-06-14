@@ -4,6 +4,9 @@ import { StatusBar } from "expo-status-bar";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useTheme } from "../hooks/useTheme";
 
+// Single QueryClient instance shared by the whole app.
+// staleTime of 5 min means cached location data is reused on navigation without a refetch.
+// retry: 2 retries failed network requests twice before surfacing an error.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -13,12 +16,15 @@ const queryClient = new QueryClient({
   },
 });
 
+// Inner shell that reads the active theme so StatusBar style stays in sync with
+// dark/light mode. Kept separate from RootLayout because useTheme requires ThemeProvider.
 function AppShell() {
   const { theme } = useTheme();
   return (
     <>
       <StatusBar style={theme.statusBar} />
       <Stack>
+        {/* Both screens hide the default Expo Router header in favour of custom UI */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="location/[id]" options={{ headerShown: false }} />
       </Stack>
@@ -26,6 +32,8 @@ function AppShell() {
   );
 }
 
+// Root layout wraps the entire app with React Query and Theme providers.
+// Expo Router renders this file automatically as the top-level layout.
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>

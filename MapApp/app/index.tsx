@@ -14,6 +14,8 @@ import { useTheme } from '../hooks/useTheme';
 import MapPin from '../components/MapPin';
 import { Location } from '../types/location';
 
+// Derives a MapView region that fits all location pins with ~40% padding on each axis.
+// The 0.02 floor prevents a region that's too tight when all pins are close together.
 function computeRegion(locations: Location[]) {
   const lats = locations.map((l) => l.lat);
   const lngs = locations.map((l) => l.lng);
@@ -23,19 +25,26 @@ function computeRegion(locations: Location[]) {
   const maxLng = Math.max(...lngs);
 
   return {
+    // Centre of the bounding box
     latitude: (minLat + maxLat) / 2,
     longitude: (minLng + maxLng) / 2,
+    // 1.4× span adds padding around the outermost pins so they're not clipped
     latitudeDelta: (maxLat - minLat) * 1.4 + 0.02,
     longitudeDelta: (maxLng - minLng) * 1.4 + 0.02,
   };
 }
 
+// Screen 1: renders a full-screen map with colour-coded pins for every location.
+// Tapping a pin navigates to the detail screen via Expo Router.
 export default function MapScreen() {
   const router = useRouter();
+  // mapRef lets us imperatively animate the camera after data loads.
   const mapRef = useRef<MapView>(null);
   const { data: locations, isLoading, isError, error } = useLocations();
   const { theme, isDark, toggleTheme } = useTheme();
 
+  // Once locations arrive, smoothly animate the camera to a region that fits all pins.
+  // Uses animateToRegion instead of setting initialRegion so the transition is visible.
   useEffect(() => {
     if (locations && locations.length > 0) {
       mapRef.current?.animateToRegion(computeRegion(locations), 500);
@@ -67,6 +76,8 @@ export default function MapScreen() {
     );
   }
 
+  // Fallback region (Abuja, Nigeria) used only before data loads or if the list is empty.
+  // The useEffect above will override this with the real bounding box once data arrives.
   const initialRegion =
     locations && locations.length > 0
       ? computeRegion(locations)
@@ -82,6 +93,7 @@ export default function MapScreen() {
         showsMyLocationButton
         userInterfaceStyle={isDark ? 'dark' : 'light'}
       >
+        {/* Each pin navigates to the detail route using Expo Router's push */}
         {locations?.map((location) => (
           <MapPin
             key={location.id}

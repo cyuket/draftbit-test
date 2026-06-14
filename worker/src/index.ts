@@ -1,5 +1,6 @@
 import { Location } from "./types";
 
+// Hardcoded dataset of notable Abuja landmarks — no database needed for the MVP
 const LOCATIONS: Location[] = [
   {
     id: "1",
@@ -113,15 +114,18 @@ const LOCATIONS: Location[] = [
   },
 ];
 
+// The Worker's single entry point — Cloudflare calls fetch() for every incoming HTTP request
 export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
+
+    // Attach CORS + content-type headers to every response so the React Native client can call this from any origin
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/json",
     };
 
-    // Handle CORS preflight
+    // Respond to browser preflight checks (OPTIONS) before the real GET request is sent
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -133,13 +137,17 @@ export default {
       });
     }
 
+    // Route: GET /locations — return the full list of locations for the map screen
     if (url.pathname === "/locations") {
       return Response.json(LOCATIONS, { headers: corsHeaders });
     }
 
+    // Route: GET /locations/:id — extract the id segment and look up a single location
     const match = url.pathname.match(/^\/locations\/(.+)$/);
     if (match) {
       const loc = LOCATIONS.find((l) => l.id === match[1]);
+
+      // Return 404 with a JSON body if no location matches the given id
       if (!loc) {
         return new Response(JSON.stringify({ error: "Not found" }), {
           status: 404,
@@ -149,6 +157,7 @@ export default {
       return Response.json(loc, { headers: corsHeaders });
     }
 
+    // Fallback: any unrecognised path returns 404 so the client gets a consistent JSON error shape
     return new Response(JSON.stringify({ error: "Not found" }), {
       status: 404,
       headers: corsHeaders,

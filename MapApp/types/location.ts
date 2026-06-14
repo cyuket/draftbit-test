@@ -1,3 +1,5 @@
+// Shared shape for a location returned by the Cloudflare Worker API.
+// Used across hooks, screens, and components to enforce consistent typing.
 export interface Location {
   id: string;
   name: string;

@@ -1,3 +1,4 @@
+// Token set for light mode — every colour used across the app is sourced from here.
 export const lightTheme = {
   background: '#FFFFFF',
   surface: '#F3F4F6',
@@ -16,6 +17,7 @@ export const lightTheme = {
   statusBar: 'dark' as const,
 };
 
+// Token set for dark mode — mirrors lightTheme structure with darker values.
 export const darkTheme = {
   background: '#0F172A',
   surface: '#1E293B',
@@ -34,6 +36,19 @@ export const darkTheme = {
   statusBar: 'light' as const,
 };
 
+// Derived type so components can type-check theme props without importing the raw objects.
 export type Theme = Omit<typeof lightTheme, 'statusBar'> & {
   statusBar: 'dark' | 'light';
+};
+
+// Maps location category strings to accent colours used by pins and badges.
+// The "default" key is the fallback for any unrecognised category.
+export const CATEGORY_COLORS: Record<string, string> = {
+  museum: '#8B5CF6',
+  park: '#10B981',
+  restaurant: '#F59E0B',
+  landmark: '#3B82F6',
+  market: '#EC4899',
+  beach: '#06B6D4',
+  default: '#6366F1',
 };
