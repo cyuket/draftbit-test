@@ -52,3 +52,13 @@ export const CATEGORY_COLORS: Record<string, string> = {
   beach: '#06B6D4',
   default: '#6366F1',
 };
+
+export   const CATEGORIES = [
+  
+    "museum",
+    "park",
+    "restaurant",
+    "landmark",
+    "market",
+    "beach",
+  ];

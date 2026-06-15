@@ -7,6 +7,7 @@ import { CATEGORY_COLORS } from "@/constants/theme";
 interface MapPinProps {
   location: Location;
   onPress: (id: string) => void;
+  onDragEnd?: (e: any) => void;
 }
 
 // Returns the accent colour for a category, falling back to the default indigo if unknown.
@@ -16,7 +17,7 @@ function getCategoryColor(category: string): string {
 
 // Custom map marker that renders a coloured circle (initial letter) with a triangular tail,
 // colour-coded by category. Calls onPress with the location id when tapped.
-export default function MapPin({ location, onPress }: MapPinProps) {
+export default function MapPin({ location, onPress, onDragEnd }: MapPinProps) {
   const color = getCategoryColor(location.category);
 
   return (
@@ -25,6 +26,7 @@ export default function MapPin({ location, onPress }: MapPinProps) {
       title={location.name}
       description={location.category}
       onPress={() => onPress(location.id)}
+      onDragEnd={onDragEnd}
     >
       {/* Circle head of the pin showing the location's initial letter */}
       <View style={[styles.pinContainer, { backgroundColor: color }]}>

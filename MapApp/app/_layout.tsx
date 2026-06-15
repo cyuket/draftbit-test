@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useTheme } from "../hooks/useTheme";
+import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Single QueryClient instance shared by the whole app.
 // staleTime of 5 min means cached location data is reused on navigation without a refetch.
@@ -36,10 +37,12 @@ function AppShell() {
 // Expo Router renders this file automatically as the top-level layout.
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AppShell />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AppShell />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
