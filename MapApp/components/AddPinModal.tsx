@@ -72,7 +72,7 @@ export function AddPinModal({ visible, lat, lng, onConfirm, onCancel }: Props) {
                 onPress={() => setCategory(cat)}
                 style={[
                   styles.catBtn,
-                  category === cat && { backgroundColor: theme.background },
+                  category === cat && { backgroundColor: "#6366F1", borderColor: "#6366F1" },
                 ]}
               >
                 <Text

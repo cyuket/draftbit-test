@@ -19,9 +19,10 @@ const LOCATIONS: Location[] = [
     description:
       "The official residence and principal workplace of the President of Nigeria, set against the backdrop of Aso Rock. An iconic seat of power in Africa.",
     category: "landmark",
-    lat: 9.0820,
+    lat: 9.082,
     lng: 7.4957,
-    imageUrl: "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=800",
+    imageUrl:
+      "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=800",
     address: "Three Arms Zone, Abuja, FCT, Nigeria",
   },
   {
@@ -54,7 +55,8 @@ const LOCATIONS: Location[] = [
     category: "park",
     lat: 9.0458,
     lng: 7.5003,
-    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800",
+    imageUrl:
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800",
     address: "Millennium Park, Maitama, Abuja, FCT, Nigeria",
   },
   {
@@ -65,7 +67,8 @@ const LOCATIONS: Location[] = [
     category: "market",
     lat: 9.0556,
     lng: 7.4867,
-    imageUrl: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=800",
+    imageUrl:
+      "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=800",
     address: "Area 10, Garki, Abuja, FCT, Nigeria",
   },
   {
@@ -87,7 +90,8 @@ const LOCATIONS: Location[] = [
     category: "market",
     lat: 9.0697,
     lng: 7.4696,
-    imageUrl: "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?w=800",
+    imageUrl:
+      "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?w=800",
     address: "Wuse Zone 5, Abuja, FCT, Nigeria",
   },
   {
@@ -98,7 +102,8 @@ const LOCATIONS: Location[] = [
     category: "park",
     lat: 9.0795,
     lng: 7.4374,
-    imageUrl: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800",
+    imageUrl:
+      "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800",
     address: "Jabi, Abuja, FCT, Nigeria",
   },
   {
@@ -131,7 +136,7 @@ export default {
         status: 204,
         headers: {
           ...corsHeaders,
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Methods": "GET, POST,OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type",
         },
       });
@@ -140,6 +145,28 @@ export default {
     // Route: GET /locations — return the full list of locations for the map screen
     if (url.pathname === "/locations") {
       return Response.json(LOCATIONS, { headers: corsHeaders });
+    }
+
+    if (request.method === "POST" && url.pathname === "/locations") {
+      const body = (await request.json()) as Partial<Location>;
+      if (!body.name || !body.lat || !body.lng) {
+        return new Response(JSON.stringify({ error: "name, lat, and lng are required" }), {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+      const newLoc: Location = {
+        id: `user_${Date.now()}`,
+        name: body.name,
+        description: body.description ?? "User-submitted location",
+        category: body.category ?? "other",
+        lat: body.lat,
+        lng: body.lng,
+        imageUrl: body.imageUrl ?? "",
+        address: body.address ?? `${body.lat.toFixed(4)}, ${body.lng.toFixed(4)}`,
+      };
+      LOCATIONS.push(newLoc);
+      return new Response(JSON.stringify(newLoc), { status: 201, headers: corsHeaders });
     }
 
     // Route: GET /locations/:id — extract the id segment and look up a single location

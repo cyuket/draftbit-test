@@ -15,6 +15,7 @@ import MapPin from "../components/MapPin";
 import { Location } from "../types/location";
 import { ScrollView } from "react-native-gesture-handler";
 import { CATEGORIES } from "@/constants/theme";
+import { AddPinModal } from "../components/AddPinModal";
 
 // Derives a MapView region that fits all location pins with ~40% padding on each axis.
 // The 0.02 floor prevents a region that's too tight when all pins are close together.
@@ -53,10 +54,19 @@ export default function MapScreen() {
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
+  const [userPins, setUserPins] = useState<Location[]>([]);
+
   const filteredLocations = useMemo(() => {
     if (!activeCategory) return locations;
     return locations?.filter((loc) => loc.category === activeCategory);
   }, [locations, activeCategory]);
+
+  const allLocations = [...(filteredLocations ?? []), ...userPins];
+
+  const handlePinConfirm = (loc: Location) => {
+    setUserPins((prev) => [...prev, loc]);
+    setPendingPin(null);
+  };
 
   // Once locations arrive, smoothly animate the camera to a region that fits all pins.
   // Uses animateToRegion instead of setting initialRegion so the transition is visible.
@@ -164,8 +174,18 @@ export default function MapScreen() {
               key={`${activeCategory ?? "all"}-${location.id}`}
               location={location}
               onPress={(id) => router.push(`/location/${id}`)}
-              onDragEnd={(e) => {}}
+              onDragEnd={(e) => {
+                const { latitude, longitude } = e.nativeEvent.coordinate;
+                setPendingPin({
+                  lat: latitude,
+                  lng: longitude,
+                });
+              }}
             />
+          ))}
+          {/* User-submitted pins — no detail route, so onPress is a no-op */}
+          {userPins.map((pin) => (
+            <MapPin key={pin.id} location={pin} onPress={() => {}} />
           ))}
         </MapView>
         <View
@@ -184,6 +204,16 @@ export default function MapScreen() {
           <Text style={styles.themeToggleIcon}>{isDark ? "☀️" : "🌙"}</Text>
         </TouchableOpacity>
       </SafeAreaView>
+
+      {pendingPin && (
+        <AddPinModal
+          visible
+          lat={pendingPin.lat}
+          lng={pendingPin.lng}
+          onConfirm={handlePinConfirm}
+          onCancel={() => setPendingPin(null)}
+        />
+      )}
     </View>
   );
 }
